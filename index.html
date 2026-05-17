@@ -547,7 +547,7 @@ body::after{
     </svg>
     <div>
       <div class="logo-text">PANEL <em>FOUNDRY</em></div>
-      <span class="logo-sub">COMIC CREATION SYSTEM v7</span>
+      <span class="logo-sub">COMIC CREATION SYSTEM v8</span>
     </div>
   </div>
   <div class="hbtns">
@@ -919,6 +919,7 @@ document.getElementById('btn-add-cover').addEventListener('click',addCoverPage);
 // Hires.fix toggle
 document.getElementById('hires-enable').addEventListener('change',function(){
   document.getElementById('hires-opts').style.display=this.checked?'block':'none';
+  if(S.selPanel)updatePanelSizeLabel(S.selPanel); // refresh label immediately
   updateHiresSizeLabel();
 });
 ['hires-mult','hires-steps','hires-denoise','hires-upscaler','hires-sampler'].forEach(id=>{
@@ -930,12 +931,14 @@ function updateHiresSizeLabel(){
   const enabled=document.getElementById('hires-enable').checked;
   if(!enabled){lbl.textContent='';return;}
   const dw=S.selPanel.el.offsetWidth, dh=S.selPanel.el.offsetHeight;
-  const {w:baseW,h:baseH}=displayToSD(dw,dh);
+  const {w:fullW,h:fullH}=displayToSD(dw,dh);
+  // Hires base gen = full size ÷ 2 (so the upscale reaches the target resolution cleanly)
+  const baseW=snapToSD(fullW/2), baseH=snapToSD(fullH/2);
   const mult=parseFloat(document.getElementById('hires-mult').value)||2;
   const hiW=snapToSD(baseW*mult), hiH=snapToSD(baseH*mult);
   const upscaler=document.getElementById('hires-upscaler').value;
   const denoise=document.getElementById('hires-denoise').value;
-  lbl.innerHTML=`BASE: ${baseW}×${baseH}<br>HIRES OUT: ${hiW}×${hiH}<br>UPSCALER: ${upscaler}<br>DENOISE: ${denoise}`;
+  lbl.innerHTML=`PANEL TARGET: ${fullW}×${fullH}<br>BASE GEN (÷2): ${baseW}×${baseH}<br>HIRES OUT (×${mult}): ${hiW}×${hiH}<br>UPSCALER: ${upscaler}<br>DENOISE: ${denoise}`;
 }
 
 function addPage(){
@@ -1226,7 +1229,13 @@ function updatePanelSizeLabel(panel){
   const pEl=panel.el;
   const dw=pEl.offsetWidth, dh=pEl.offsetHeight;
   const {w,h}=displayToSD(dw,dh);
-  document.getElementById('panel-size-lbl').textContent=`GEN SIZE: ${w}×${h}px`;
+  const hiresOn=document.getElementById('hires-enable').checked;
+  if(hiresOn){
+    const bw=snapToSD(w/2), bh=snapToSD(h/2);
+    document.getElementById('panel-size-lbl').textContent=`GEN SIZE: ${bw}×${bh}px (HIRES BASE)`;
+  } else {
+    document.getElementById('panel-size-lbl').textContent=`GEN SIZE: ${w}×${h}px`;
+  }
   updateHiresSizeLabel();
 }
 
@@ -1295,7 +1304,7 @@ async function generateImage(panel){
 
   // Use LIVE panel display size → convert to SD dimensions
   const dw=panel.el.offsetWidth, dh=panel.el.offsetHeight;
-  const {w:genW,h:genH}=displayToSD(dw,dh);
+  const {w:fullW,h:fullH}=displayToSD(dw,dh);
   updatePanelSizeLabel(panel);
 
   // Hires.fix config — read from UI
@@ -1306,11 +1315,18 @@ async function generateImage(panel){
   const hiresSteps=parseInt(document.getElementById('hires-steps').value)||20;
   const hiresDenoise=parseFloat(document.getElementById('hires-denoise').value)||0.45;
   const hiresModules=document.getElementById('hires-modules').value;
+  const useHires=hiresEnabled;
 
-  // Compute expected hires output size for display only (Forge computes it from hr_scale)
+  // When Hires. Fix is enabled, halve the base gen size so the upscale pass
+  // brings the result up to (or near) the original panel target.
+  // SDXL and earlier models generate better detail at lower resolutions;
+  // e.g. a 1024×1024 panel → generate at 512×512 → upscale ×2 → 1024×1024
+  const genW = useHires ? snapToSD(fullW/2) : fullW;
+  const genH = useHires ? snapToSD(fullH/2) : fullH;
+
+  // Expected hires output (display only — Forge calculates from hr_scale)
   const hiresW=snapToSD(genW*hiresMult);
   const hiresH=snapToSD(genH*hiresMult);
-  const useHires=hiresEnabled;
 
   let ovr=panel.el.querySelector('.gen-overlay');
   if(!ovr){ovr=document.createElement('div');ovr.className='gen-overlay';panel.el.appendChild(ovr);}
