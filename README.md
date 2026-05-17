@@ -8,10 +8,10 @@ A browser-based comic book creation tool that generates panel artwork through a 
 ## Screenshots
 
 **Cover page — full-bleed panel with generated artwork**
-![Cover page](screenshots/cover-page.png)
+![Cover page](screenshots/cover_page.png)
 
 **Multi-panel story page with snap-to-grid layout**
-![Panel layout](screenshots/inside-page.png)
+![Panel layout](screenshots/inside_page.png)
 
 **Text Bubble Feature**
 ![Bubble_Text](screenshots/page_text.png)
