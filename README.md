@@ -105,7 +105,7 @@ PDF output uses jsPDF and produces a print-ready file at **6.625" × 10.25"** (4
 ## Requirements
 
 - A modern browser (Chrome or Edge recommended for best html2canvas export support)
-- A running **SD-Forge** or **SD-Forge Neo** instance with the API enabled
+- A running **SD-Forge** or **SD-Forge Neo** instance with the API enabled (locally or on a remote machine)
 - SD-Forge must be launched with `--api` and `--cors-allow-origins=*` (or your specific browser origin)
 
 ### SD-Forge launch flags
