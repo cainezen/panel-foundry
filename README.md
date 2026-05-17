@@ -83,7 +83,7 @@ All exports strip UI chrome (borders, grid, buttons, panel numbers unless toggle
 
 ### SD-Forge launch flags
 ```
-webui.bat --api --cors-allow-origins=*
+webui.bat --listen --api
 ```
 
 ---
