@@ -111,7 +111,7 @@ PDF output uses jsPDF and produces a print-ready file at **6.625" × 10.25"** (4
 ### SD-Forge launch flags
 
 ```
-webui.bat --api --cors-allow-origins=*
+webui.bat --listen (if a remote machine is used) --api
 ```
 
 ---
@@ -209,7 +209,6 @@ panel-foundry/
 
 - **Export uses html2canvas** — SVG speech bubbles and CSS effects render correctly in most cases, but complex shapes may not capture perfectly in all browsers. Chrome and Edge give the most reliable results.
 - **Hires. Fix + Flux** — Hires. Fix is a traditional SD 1.x/SDXL feature. Flux-based models in Forge Neo use a different native high-res workflow and the hires parameters will be silently ignored by the backend.
-- **CORS** — If the browser blocks API calls to your local SD-Forge instance, make sure Forge is launched with `--cors-allow-origins=*`.
 - **Panel resize** — The browser's native `resize: both` CSS property is used for panel resizing. Behaviour may differ slightly between browsers; Chrome gives the most consistent experience.
 - **Export All downloads** — Browsers may prompt to allow multiple file downloads. Allow them when asked.
 - **PDF file size** — JPEG compression at 93% quality is used for PDF pages. Very large panels at high multipliers will produce larger PDF files.
